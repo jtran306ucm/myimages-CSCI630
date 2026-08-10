@@ -671,3 +671,26 @@ def test_the_controls_and_the_resolution_badge_are_the_same_height(qtbot, make_i
         f"controls {pane.controls_bar.height()}px "
         f"vs badge {pane.resolution_label.height()}px"
     )
+
+
+class RecordingPlayer:
+    """Stand-in that remembers how many loops it was configured for."""
+
+    def __init__(self) -> None:
+        self.loops: object = None
+
+    def setLoops(self, loops: object) -> None:
+        self.loops = loops
+
+
+def test_a_video_repeats_like_the_gif_beside_it(qtbot):
+    """A two-second sticker played once leaves a black rectangle where the
+    picture was. The same animation saved as a .gif loops, and the container it
+    was exported to is not a reason for the pane to behave differently."""
+    from PySide6.QtMultimedia import QMediaPlayer
+
+    from myimages.gui.preview_pane import loop_forever
+
+    player = RecordingPlayer()
+    loop_forever(cast(Any, player))
+    assert player.loops == QMediaPlayer.Loops.Infinite

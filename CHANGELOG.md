@@ -34,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- A video played once and left a black rectangle where the picture had been.
+  Half the video in a folder of pictures is a sticker two seconds long, and the
+  same animation saved as a .gif loops in the same pane — which container it
+  was exported to is not a reason to behave differently. Video repeats now.
 - Selecting a video showed an empty pane. The preview loaded the file and
   switched to the video widget but never started playback, and the backend
   decodes nothing until it does, so the sink was never handed a frame. A

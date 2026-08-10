@@ -61,6 +61,20 @@ except Exception:  # noqa: BLE001 - optional module, absence is fine
     PDF_BACKEND_AVAILABLE = False
 
 
+def loop_forever(player: QMediaPlayer) -> None:
+    """Make a player repeat its clip, the way the GIF in the same pane does.
+
+    Half the video in a folder of pictures is a sticker two seconds long, and
+    playing one once leaves a black rectangle where the picture was. The same
+    animation saved as a .gif loops, and which container somebody exported it
+    to is not a reason to behave differently.
+
+    A long clip loops too. By the time one reaches its end the window has
+    usually moved on, and the button beside the picture stops it.
+    """
+    player.setLoops(QMediaPlayer.Loops.Infinite)
+
+
 def load_pixmap(path: str | Path) -> QPixmap:
     """Load an image honouring its EXIF orientation; empty pixmap on failure."""
     reader = QImageReader(str(path))
@@ -211,6 +225,7 @@ class PreviewPane(QWidget):
         if VIDEO_BACKEND_AVAILABLE:
             self.video_widget = QVideoWidget()
             self.media_player = QMediaPlayer(self)
+            loop_forever(self.media_player)
             self.audio_output = QAudioOutput(self)
             self.media_player.setAudioOutput(self.audio_output)
             self.media_player.setVideoOutput(self.video_widget)

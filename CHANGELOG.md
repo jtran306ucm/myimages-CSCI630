@@ -51,8 +51,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   unattached waiting for it, and had to be put on the release by hand.
   Each platform now attaches its own files the moment they exist, rather than
   one job collecting everything at the end, so a download appears as soon as it
-  is built and the slowest platform costs the others nothing. A final check
-  refuses a release that ended up with no downloads at all.
+  is built and the slowest platform costs the others nothing. The wheel and the
+  sdist go up the same way, from the job that builds them: they belong on PyPI
+  and that is where anyone installing gets them, but a release listing four
+  platform downloads and not the package itself reads as though the package
+  were missing. A final check refuses a release that ended up with no downloads
+  at all.
 
 
 ## [0.0.3] - 2026-08-04

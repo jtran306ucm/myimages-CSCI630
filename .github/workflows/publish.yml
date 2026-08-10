@@ -53,6 +53,8 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -122,6 +124,20 @@ jobs:
           name: dist
           path: dist/
           if-no-files-found: error
+      # After the artifact, not before: publish downloads that, and a failure to
+      # attach here must not cost the release its wheel on PyPI. And after the
+      # version guard and twine, so nothing unverified is ever attached.
+      #
+      # The wheel and the sdist belong on PyPI, and that is where anyone
+      # installing gets them. They are here as well because a GitHub release
+      # that lists four platform downloads and not the package itself reads as
+      # though the package were missing.
+      - name: Attach to the release
+        if: ${{ github.event_name == 'release' || github.ref_type == 'tag' }}
+        uses: ./.github/actions/attach-release-assets
+        with:
+          files: "dist/*.whl dist/*.tar.gz"
+          token: ${{ github.token }}
 
   linux-artifacts:
     # The downloadable artifacts. Independent of the PyPI path on purpose: a

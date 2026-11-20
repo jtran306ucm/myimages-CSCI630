@@ -298,6 +298,8 @@ def test_moving_to_another_file_stops_the_video(qtbot, tmp_path, make_image):
     fake.stopped = False
     pane.show_media(build_media_file(make_image()))
     assert fake.stopped is True
+    # Check that the video widget does not appear
+    assert pane.video_widget is None
 
 
 # -- a video the backend cannot decode -------------------------------------

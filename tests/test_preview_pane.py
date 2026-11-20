@@ -302,6 +302,19 @@ def test_moving_to_another_file_stops_the_video(qtbot, tmp_path, make_image):
     assert pane.video_widget is None
 
 
+# Switching from video to gif should delete video pane
+def test_video_to_gif(qtbot, tmp_path, make_image):
+    """Nothing is left running behind the user: the clip that autoplayed must
+    not still be decoding once its file is off the screen."""
+    pane, fake = fake_video_pane(qtbot)
+    pane.show_media(video_media(tmp_path))
+    fake.stopped = False
+    pane.show_media(gif_media(tmp_path, make_image))
+    assert fake.stopped is True
+    # Check that the video widget does not appear
+    assert pane.video_widget is None
+
+
 # -- a video the backend cannot decode -------------------------------------
 
 

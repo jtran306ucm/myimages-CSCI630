@@ -70,3 +70,46 @@ def test_no_tooltip_is_a_sentence(windows):
         if len(button.toolTip().split()) > MOST_TOOLTIP_WORDS
     ]
     assert not wordy, f"tooltips over {MOST_TOOLTIP_WORDS} words: {wordy}"
+
+
+# Show which tooltips appear offscreen
+def test_tooltips_onscreen(qtbot, windows):
+    offscreen = []
+
+    for root in windows:
+        root.show()
+        qtbot.waitExposed(root)
+
+        for button in icon_buttons(root):
+            if not button.isVisible() or not button.toolTip().strip():
+                continue
+
+            screen = button.screen().availableGeometry()
+
+            QToolTip.hideText()
+            QToolTip.showText(
+                button.mapToGlobal(button.rect().topRight()),
+                button.toolTip(),
+                button,
+            )
+
+            qtbot.waitUntil(QToolTip.isVisible)
+
+            tooltip = next(
+                (
+                    widget
+                    for widget in QApplication.topLevelWidgets()
+                    if widget.isVisible()
+                    and widget.windowType() == Qt.WindowType.ToolTip
+                ),
+                None,
+            )
+
+            assert tooltip is not None
+
+            if not screen.contains(tooltip.frameGeometry()):
+                offscreen.append(button.toolTip())
+
+            QToolTip.hideText()
+
+    assert not offscreen, f"{len(offscreen)} tooltips offscreen: {offscreen}"

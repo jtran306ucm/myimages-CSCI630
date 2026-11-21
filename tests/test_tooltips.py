@@ -79,7 +79,14 @@ def test_tooltips_onscreen(qtbot, windows):
     for root in windows:
         root.show()
         qtbot.waitExposed(root)
+        # Print the screen size of the testing env
+        print(
+            type(root).__name__,
+            "window:", root.size(),
+            "screen:", root.screen().availableGeometry(),
+        )
 
+        # Get the tooltips from each button
         for button in icon_buttons(root):
             if not button.isVisible() or not button.toolTip().strip():
                 continue
@@ -95,6 +102,7 @@ def test_tooltips_onscreen(qtbot, windows):
 
             qtbot.waitUntil(QToolTip.isVisible)
 
+            # Get the tooltip widget info
             tooltip = next(
                 (
                     widget
@@ -107,8 +115,15 @@ def test_tooltips_onscreen(qtbot, windows):
 
             assert tooltip is not None
 
+            # Check if the tooltip is completely onscreen
             if not screen.contains(tooltip.frameGeometry()):
-                offscreen.append(button.toolTip())
+                offscreen.append({
+                    "text": button.toolTip(),
+                    "button_position": button.mapToGlobal(
+                        button.rect().topLeft()
+                    ),
+                    "tooltip_geometry": tooltip.frameGeometry().getRect(),
+                })
 
             QToolTip.hideText()
 

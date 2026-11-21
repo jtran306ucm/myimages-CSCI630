@@ -13,13 +13,14 @@ from typing import Any, cast
 
 from PySide6.QtCore import QPoint, QPointF, QSize, Qt
 from PySide6.QtGui import QIcon, QWheelEvent
-from PySide6.QtWidgets import QLabel, QToolButton, QWidget
+from PySide6.QtWidgets import QLabel, QToolButton, QWidget, QApplication
 
 from myimages import icons
 from myimages.core.media import MediaFile, MediaKind, build_media_file
 from myimages.core.plugins import PluginRegistry
 from myimages.gui.preview_pane import (
     VIDEO_BACKEND_AVAILABLE,
+    PDF_BACKEND_AVAILABLE,
     PreviewPane,
     load_pixmap,
 )
@@ -709,3 +710,21 @@ def test_a_video_repeats_like_the_gif_beside_it(qtbot):
     player = RecordingPlayer()
     loop_forever(cast(Any, player))
     assert player.loops == QMediaPlayer.Loops.Infinite
+
+
+# Test scrolling at the edge of a PDF
+def test_scrolling_with_pdf(qtbot, tmp_path):
+    # Create a PDF and show it
+    media = pdf_media(tmp_path)
+    pane = make_pane(qtbot)
+    pane.show_media(media)
+    pane.show()
+    view = pane.pdf_preview
+
+    # Scrolling should not send a navigate signal
+    with qtbot.assertNotEmitted(pane.navigate):
+        QApplication.sendEvent(pane, wheel_event(120))
+
+    # After scrolling, the PDF should still be shown
+    assert pane.current_media is media
+    assert pane.stack.currentWidget() is view

@@ -13,14 +13,14 @@ from typing import Any, cast
 
 from PySide6.QtCore import QPoint, QPointF, QSize, Qt
 from PySide6.QtGui import QIcon, QWheelEvent
-from PySide6.QtWidgets import QLabel, QToolButton, QWidget, QApplication
+from PySide6.QtWidgets import QApplication, QLabel, QToolButton, QWidget
 
 from myimages import icons
 from myimages.core.media import MediaFile, MediaKind, build_media_file
 from myimages.core.plugins import PluginRegistry
 from myimages.gui.preview_pane import (
-    VIDEO_BACKEND_AVAILABLE,
     PDF_BACKEND_AVAILABLE,
+    VIDEO_BACKEND_AVAILABLE,
     PreviewPane,
     load_pixmap,
 )
@@ -520,7 +520,6 @@ def test_scale_gif_is_safe_without_a_movie(qtbot):
 
 
 def test_pdf_document_is_previewed(qtbot, tmp_path):
-    from myimages.gui.preview_pane import PDF_BACKEND_AVAILABLE
 
     media = pdf_media(tmp_path)
     assert media.kind is MediaKind.DOCUMENT
@@ -542,7 +541,7 @@ def test_pdf_message_when_backend_missing(qtbot, tmp_path):
 
 
 def test_pdf_preview_renders_reloads_and_resizes(qtbot, tmp_path):
-    from myimages.gui.preview_pane import PDF_BACKEND_AVAILABLE, PdfPreview
+    from myimages.gui.preview_pane import PdfPreview
 
     if not PDF_BACKEND_AVAILABLE:
         return
@@ -563,7 +562,7 @@ def test_pdf_preview_renders_reloads_and_resizes(qtbot, tmp_path):
 
 
 def test_pdf_preview_batches_large_documents(qtbot, tmp_path, make_image):
-    from myimages.gui.preview_pane import PDF_BACKEND_AVAILABLE, PDF_PAGE_BATCH
+    from myimages.gui.preview_pane import PDF_PAGE_BATCH
     from myimages.imaging.pdfbuilder import PdfOptions, build_pdf
 
     if not PDF_BACKEND_AVAILABLE:
@@ -587,7 +586,6 @@ def test_pdf_preview_batches_large_documents(qtbot, tmp_path, make_image):
 
 
 def test_unreadable_pdf_shows_message(qtbot, tmp_path):
-    from myimages.gui.preview_pane import PDF_BACKEND_AVAILABLE
 
     if not PDF_BACKEND_AVAILABLE:
         return

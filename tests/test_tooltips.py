@@ -15,7 +15,8 @@ ours to caption, and every platform draws it the same way.
 from __future__ import annotations
 
 import pytest
-from PySide6.QtWidgets import QAbstractButton, QLineEdit
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QAbstractButton, QApplication, QLineEdit, QToolTip
 
 from myimages.config import Settings
 from myimages.core.media import build_media_file

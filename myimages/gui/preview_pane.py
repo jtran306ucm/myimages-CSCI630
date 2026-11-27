@@ -432,6 +432,33 @@ class PreviewPane(QWidget):
             self.plugin_widget.deleteLater()
             self.plugin_widget = None
 
+    def create_video_widget(self) -> None:
+        if (
+            not VIDEO_BACKEND_AVAILABLE
+            or self.video_widget is not None
+            or self.media_player is None
+        ):
+            return
+
+        self.video_widget = QVideoWidget()
+        self.media_player.setVideoOutput(self.video_widget)
+        self.stack.addWidget(self.video_widget)
+        self.enable_context_menu()
+
+    def destroy_video_widget(self) -> None:
+        if self.video_widget is None:
+            return
+
+        video_widget = self.video_widget
+
+        if self.media_player is not None:
+            self.media_player.stop()
+
+        self.stack.removeWidget(video_widget)
+        self.video_widget = None
+
+        video_widget.deleteLater()
+
     def show_media(
         self, media_file: MediaFile | None, registry: PluginRegistry | None = None
     ) -> None:
@@ -455,18 +482,23 @@ class PreviewPane(QWidget):
             self.update_controls(MediaKind.OTHER)
             return
 
+        # When selecting non video files, destroy the video widget
         if media_file.kind is MediaKind.IMAGE and media_file.suffix == ".gif":
             self.show_gif(media_file)
+            self.destroy_video_widget()
         elif media_file.kind is MediaKind.IMAGE:
             self.show_image(media_file)
+            self.destroy_video_widget()
         elif media_file.kind is MediaKind.VIDEO:
             self.show_video(media_file)
         elif media_file.kind is MediaKind.DOCUMENT:
             self.show_pdf(media_file)
+            self.destroy_video_widget()
         else:
             self.message_label.setText(f"No preview for {media_file.suffix} files")
             self.stack.setCurrentWidget(self.message_label)
             self.update_controls(MediaKind.OTHER)
+            self.destroy_video_widget()
 
     def show_plugin(self, widget: QWidget) -> None:
         self.plugin_widget = widget
@@ -485,6 +517,8 @@ class PreviewPane(QWidget):
         self.update_controls(MediaKind.IMAGE)
 
     def show_video(self, media_file: MediaFile) -> None:
+        self.create_video_widget()
+
         if self.media_player is not None and self.video_widget is not None:
             self.media_player.setSource(QUrl.fromLocalFile(str(media_file.path)))
             self.stack.setCurrentWidget(self.video_widget)
@@ -599,5 +633,11 @@ class PreviewPane(QWidget):
         if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
             event.ignore()
             return
+
+        # Disable file scrolling for PDF files
+        if self.stack.currentWidget() is self.pdf_preview:
+            event.ignore()
+            return
+
         self.navigate.emit(-1 if event.angleDelta().y() > 0 else 1)
         event.accept()
